@@ -1,4 +1,4 @@
-# {{PROJECT_NAME}} 🚀
+# antigravity-qgis-framerepo 🚀
 
 [![Framework](https://img.shields.io/badge/framework-Antigravity%20Gen%204-6f42c1?style=for-the-badge)](#)
 [![Version](https://img.shields.io/badge/version-4.0.0--dev-blue.svg)](#)

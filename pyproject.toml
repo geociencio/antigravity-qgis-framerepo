@@ -1,11 +1,11 @@
 [project]
-name = "{{PROJECT_NAME}}"
+name = "antigravity-qgis-framerepo"
 version = "1.0.0"
 description = "Starter kit for Antigravity-powered projects"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-    { name = "Your Name", email = "your.email@example.com" }
+    { name = "juanb", email = "juanbernales@gmail.com" }
 ]
 dependencies = [
     "ai-context-core>=3.0.1",
