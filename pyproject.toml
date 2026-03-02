@@ -7,6 +7,7 @@ requires-python = ">=3.10"
 authors = [
     { name = "juanb", email = "juanbernales@gmail.com" }
 ]
+keywords = ["qgis", "qgis-plugin", "python", "ai-agents", "antigravity-framework", "template", "gis", "llm-workflow"]
 dependencies = [
     "ai-context-core>=3.0.1",
 ]
