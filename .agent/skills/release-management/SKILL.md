@@ -1,80 +1,93 @@
 ---
 name: release-management
-description: Estándares para el proceso de liberación de un plugin QGIS con validación de calidad.
-trigger: al preparar lanzamientos, actualizar versiones o usar el workflow /release-plugin
+description: Standards for the QGIS plugin release process with quality validation.
+trigger: when preparing releases, updating versions, or using the /release-plugin workflow.
 ---
 
-# Gestión de Releases (Plugin QGIS)
+# Release Management (Full Version)
 
-Controla el ciclo de vida de las versiones del plugin, garantizando que cada entrega cumpla con los estándares del repositorio oficial de QGIS y los lineamientos de calidad del proyecto.
+Controls the plugin's version lifecycle, ensuring that each delivery meets the standards of the QGIS repository and the project.
 
-## Cuándo usar este skill
-- Al finalizar una fase de desarrollo y preparar una nueva versión.
-- Al actualizar `metadata.txt` o la configuración del empaquetado.
-- Al generar notas de versión o actualizar el changelog.
-- Al usar el workflow `/release-plugin`.
+## When to use this skill
+- When finishing a development phase and preparing a new version.
+- When updating `metadata.txt` or `pyproject.toml`.
+- When generating release notes or updating the changelog.
+- When using the `/release-plugin` workflow.
 
-## Grado de Libertad
-- **Estricto**: El proceso de empaquetado y los requisitos del `metadata.txt` de QGIS son innegociables.
+## Degree of Freedom
+- **Strict**: The 5-phase process and quality score requirements are non-negotiable.
 
-## Workflow Detallado
+## Detailed Workflow
 
-### Fase 1: Calidad y Preparación
-1. **Análisis de Calidad**:
-   Asegurar que no hay violaciones arquitectónicas graves y que la complejidad ciclomática está controlada.
-2. **Actualizar Badges**: Reflejar métricas en `README.md`.
+### Phase 1: Quality and Preparation
+1. **Quality and Security Analysis**:
+   ```bash
+   uv run qgis-analyzer analyze . -o analysis_results
+   uv run qgis-analyzer security --deep .
+   ```
+   - Validate: Score > 25, zero High-Severity security issues, no critical violations (CC > 20).
+2. **Update Badges**: Reflect metrics in `README.md`.
 
-### Fase 2: Versionado y Documentación
+### Phase 2: Versioning and Documentation
 
 > [!IMPORTANT]
-> **CHECKLIST COMPLETO DE DOCUMENTOS A ACTUALIZAR**:
+> **FULL CHECKLIST OF DOCUMENTS TO UPDATE** (each file in this order):
 >
-> | # | Archivo | Qué actualizar |
-> |:--|:--------|:--------------|
-> | 1 | `metadata.txt` | `version` + `changelog` (escapar `%%`) |
-> | 2 | `README.md` | Badge `Version`, sección "What's New" |
-> | 3 | `CHANGELOG.md` | Mover `[Unreleased]` a `[X.Y.Z]` con fecha |
-> | 4 | Resumen de Versión | Generar documento de Notas de Versión en `docs/releases/` |
+> | # | File | What to update |
+> |:--|:-----|:--------------|
+> | 1 | `metadata.txt` | `version` + `changelog` (escape `%%`) |
+> | 2 | `pyproject.toml` | `version` |
+> | 3 | `README.md` | Badges: `Version`, `Code Quality`, `QGIS Compliance`, `i18n`, "What's New" section |
+> | 4 | `docs/CHANGELOG.md` | Move `[Unreleased]` to `[X.Y.Z]` with date |
+> | 5 | `docs/docsec/CHANGELOG.md` | Same for Spanish documentation |
+> | 6 | `docs/releases/RELEASE_NOTES_vX.Y.Z.md` | Create new file with highlights |
+> | 7 | `docs/DEVELOPMENT_LOG.md` | Add version closing entry |
+> | 8 | `.agent/QUICK_REFERENCE.md` | Update test count and metrics |
 
-1. **Sincronización**: Actualizar `metadata.txt` (incluyendo changelog completo para QGIS).
-2. **Estándares de Versionamiento y Registro (CRÍTICO)**:
+1. **Synchronization**: Update `metadata.txt` (including changelog), `pyproject.toml`, and `README.md`.
+2. **Versioning and Registration Standards (CRITICAL)**:
    - **[Semantic Versioning (SemVer)](https://semver.org/spec/v2.0.0.html)**:
-     - MAJOR (X): Cambios incompatibles (Breaking Changes / Migración de QGIS 3 a 4).
-     - MINOR (Y): Nuevas funcionalidades retrocompatibles.
-     - PATCH (Z): Correcciones de errores (Bugfixes).
-   - **[Keep a Changelog](https://keepachangelog.com/es/1.0.0/)**:
-     - Mantener `CHANGELOG.md` alineado con el estándar.
+     - MAJOR (X): Breaking changes.
+     - MINOR (Y): Backward-compatible new features.
+     - PATCH (Z): Backward-compatible bug fixes.
+   - **[Keep a Changelog](https://keepachangelog.com/en/1.0.0/)**:
+     - Keep `docs/CHANGELOG.md` and `docs/docsec/CHANGELOG.md` strictly aligned with this standard.
+     - Group changes logically (`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`).
+3. **Release Notes**: Generate detailed release notes in `docs/releases/RELEASE_NOTES_vX.Y.Z.md`.
 
-### Fase 3: Verificación Técnica
-1. Lograr que la suite completa de tests de integración de QGIS pase sin errores.
-2. Ejecutar chequeo en entorno limpio (ej: `make docker-test`).
+### Phase 3: Technical Verification
+1. Achieve 535+ passing tests.
+2. Run `make docker-test` for an isolated environment.
+3. Update `AI_CONTEXT.md` via `uv run ai-ctx analyze`.
 
-### Fase 4: Git y Etiquetado
-1. Commit de release: `chore(release): prepare vX.Y.Z`.
-2. Etiqueta: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`.
+### Phase 4: Git and Tagging
+1. Release commit: `chore(release): prepare vX.Y.Z`.
+2. Tag: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`.
 3. Push: `git push origin main --tags`.
 
-### Fase 5: Empaquetado y Distribución
-1. Build: Crear el empaquetado `.zip` (usando `pb_tool`, `make package` o herramienta preferida).
-2. Validar ZIP: Asegurarse de excluir `__pycache__`, `.git`, tests y archivos ocultos (`.env`, `.gitignore`).
-3. Carga: Subir a [plugins.qgis.org](https://plugins.qgis.org/) si es un plugin público, o distribuir internamente.
+### Phase 5: Packaging and Distribution
+1. Build: `make package VERSION=main`.
+2. Validate ZIP in `dist/`: No `__pycache__`, no test files.
+3. Upload: Upload to [plugins.qgis.org](https://plugins.qgis.org/) and create a draft on GitHub.
 
-## Instrucciones y Reglas
+## Instructions and Rules
 
-### Detalle de Archivos Críticos
-- **metadata.txt**: Debe contener `version`, `qgisMinimumVersion` válido y el `changelog` formateado según exigen los repositorios de QGIS.
+### Critical Files Detail
+- **metadata.txt**: Must contain `version`, `qgisMinimumVersion`, and formatted `changelog`.
+- **pyproject.toml**: The `version` field must match exactly.
 
-### Plantilla de Release Notes
+### Release Notes Template
 ```markdown
 # Release vX.Y.Z - [Title]
 Highlights:
 - **feat**: ...
 - **fix**: ...
-Published Artifacts: `plugin_name.X.Y.Z.zip`
+Published Artifacts: `sec_interp.X.Y.Z.zip`
 ```
 
-## Checklist de Calidad
-- [ ] ¿Se han actualizado todas las referencias de versión de PyQGIS (`metadata.txt`)?
-- [ ] ¿El archivo ZIP ha sido depurado (sin basura técnica ni tests)?
-- [ ] ¿Se han seguido las reglas de Git Tagging?
-- [ ] ¿Los tests pasan satisfactoriamente en entorno QGIS aislado?
+## Quality Checklist
+- [ ] Is the Quality Score above 25/100?
+- [ ] Have all version references been updated?
+- [ ] Has the ZIP file been verified (no technical garbage)?
+- [ ] Have Git Tagging rules been followed?
+- [ ] Did the 535+ tests pass successfully?

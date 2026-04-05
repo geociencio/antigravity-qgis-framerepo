@@ -1,40 +1,40 @@
 ---
 name: qa-standards
-description: Estándares para pruebas automáticas, CI/CD y uso de Mocks.
-trigger: al escribir o ejecutar tests, diseñar estrategias de prueba o manejar infraestructura de pruebas.
+description: Standards for automated testing, CI/CD, and the use of Mocks.
+trigger: when writing or executing tests, designing testing strategies, or managing testing infrastructure.
 ---
 
-# QA y Automatización
+# QA and Automation Standards
 
-Garantiza la estabilidad del código mediante un entorno de ejecución controlado, estrategias de simulación (Mocks) y prácticas de CI/CD.
+Ensures code stability through a controlled execution environment, simulation strategies (Mocks), and CI/CD practices.
 
-## Cuándo usar este skill
-- Al crear nuevos casos de prueba unitarios o de integración.
-- Al depurar fallos en el pipeline de CI/CD.
-- Al configurar o modificar el entorno de pruebas.
+## When to use this skill
+- When creating new unit or integration test cases.
+- When debugging failures in the CI/CD pipeline.
+- When configuring or modifying the testing environment.
 
-## Grado de Libertad
-- **Guiado**: Se deben seguir las estrategias de testing definidas en el proyecto, buscando alta cobertura y aislamiento.
+## Degree of Freedom
+- **Guided**: Follow the testing strategies defined for the project, aiming for high coverage and isolation.
 
 ## Workflow
-1. **Diseño**: Aplicar estrategia "Test-Driven Development (TDD)" o "Behaviour-Driven Development (BDD)" según el proyecto.
-2. **Implementación**: Crear tests usando el framework principal del proyecto (ej: `pytest`, `jest`, etc.). Aislar dependencias externas mediante Mocks.
-3. **Ejecución**: Validar localmente mediante el Local Test Runner y luego en el entorno de CI/CD.
-4. **Cobertura**: Verificar que se alcanza la cobertura mínima exigida (> 80%).
+1. **Design**: Apply "Test-Driven Development (TDD)" or "Behaviour-Driven Development (BDD)" strategies as appropriate for the project.
+2. **Implementation**: Create tests using the project's primary framework (e.g., `pytest`, `unittest`, `jest`, etc.). Isolate external dependencies using Mocks.
+3. **Execution**: Validate locally using the Local Test Runner and then in the CI/CD environment.
+4. **Coverage**: Verify that the minimum required coverage is achieved (> 80%).
 
-## Instrucciones y Reglas
+## Instructions and Rules
 
-### Estrategia de Testing
-- **Aislamiento**: Las pruebas unitarias deben ejecutarse de forma rápida y sin dependencias externas (bases de datos, red, UI).
-- **Mocks**: Simular (mockear) servicios externos y librerías de terceros complejas. Limpiar los mocks rigurosamente después de cada test.
-- **Integración**: Los tests de integración deben validar el flujo completo en un entorno lo más cercano posible al de producción (ej. contenedores Docker).
+### Testing Strategy
+- **Isolation**: Unit tests must run quickly and without external dependencies (databases, network, UI).
+- **Mocks**: Simulate (mock) external services and complex third-party libraries. Rigorously clean up mocks after each test.
+- **Integration**: Integration tests must validate the complete flow in an environment as close as possible to production (e.g., Docker containers).
 
-### Entorno de Pruebas
-- **Consistencia**: El comando de test principal (`{{TEST_COMMAND}}`) debe ser el control de salud definitivo. Si pasa en local, debe pasar en CI/CD.
-- **Limpieza**: Evitar que los tests dejen estado residual en el entorno.
+### Testing Environment
+- **Consistency**: The main test command (`{{TEST_COMMAND}}`) must be the definitive health check. If it passes locally, it must pass in CI/CD.
+- **Cleanup**: Avoid leaving residual state in the environment from tests.
 
-## Checklist de Calidad
-- [ ] ¿La cobertura de nuevos servicios es satisfactoria (> 80%)?
-- [ ] ¿Se limpian los patches/Mocks después de cada test?
-- [ ] ¿Los tests unitarios pueden ejecutarse de forma aislada sin levantar servicios pesados?
-- [ ] ¿El entorno de pruebas reporta estabilidad (0 fallos)?
+## Quality Checklist
+- [ ] Is the coverage of new services satisfactory (> 80%)?
+- [ ] Are patches/Mocks cleaned up after each test?
+- [ ] Can unit tests be executed in isolation without starting heavy services?
+- [ ] Does the testing environment report zero failures?

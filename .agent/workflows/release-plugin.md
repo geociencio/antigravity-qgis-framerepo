@@ -1,111 +1,156 @@
 ---
-description: Proceso unificado de liberación (QGIS Release Flow) basado en la guía de IA
+description: Unified Release Workflow (QGIS Release Flow) based on IA Guide
 agent: QA Engineer
-skills: [release-management, qa-qgis-docker, commit-standards]
+skills: [release-management, qa-docker, commit-standards, i18n-standards, changelog-generator]
 validation: |
-  - Verificar que la suite de tests pasa en Docker / Local
-  - Confirmar que métricas de código (`qgis-analyzer` o similar) son aceptables
-  - Asegurar Zero High-Severity Security Findings
-  - Validar que las versiones están sincronizadas en archivos clave (`metadata.txt`)
-  - Verificar que ZIP se generó correctamente sin basura
+  - Verify that 535+ tests pass in Docker
+  - Confirm that qgis-analyzer score > 25/100
+  - Ensure Zero High-Severity Security Findings (`security --deep`)
+  - Validate that versions are synchronized in 3 files
+  - Verify that ZIP was generated correctly
 ---
 
-Sigue este flujo de 5 fases para realizar una liberación oficial del plugin para QGIS.
+# Workflow: Release Plugin
 
-### Fase 1: Calidad y Preparación
+Follow this 5-phase workflow to perform an official release of the SecInterp plugin.
 
-🤖 **Agent Action**: Usar skill **release-management** para validar checklist completo de pre-release.
+### Phase 1: Quality and Preparation
 
-1. **Analizar Calidad**:
+🤖 **Agent Action**: Use **release-management** skill to validate complete pre-release checklist.
+
+1. **Analyze Quality**:
    // turbo
    ```bash
-   # EJEMPLO PYTHON: qgis-analyzer analyze . u otra herramienta
-   {{COMPLEXITY_CHECK_COMMAND}}
+   uv run qgis-analyzer analyze . -o analysis_results
    ```
 
-   🤖 **Agent Action**: Verificar que:
-   - Overall Plugin Score es aceptable.
-   - No hay violaciones críticas de QGIS compliance (uso de `QgsTask` correcto).
+   🤖 **Agent Action**: Verify that:
+   - Overall Plugin Score > 25/100
+   - No critical QGIS compliance violations
+   - **Note**: Discard i18n false positives in docstrings if `core/` has 100% coverage.
 
-2. **Actualizar Badges**: Actualizar métricas de calidad en `README.md` según los resultados.
+2. **Update Badges**: Update `Code Quality` and `QGIS Compliance` in `README.md` based on results.
 
-### Fase 2: Versionamiento y Documentación
+### Phase 2: Versioning and Documentation
 
-🤖 **Agent Action**: Usar skill **release-management** para sincronizar versiones automáticamente.
+🤖 **Agent Action**: Use **release-management** skill to synchronize versions automatically.
 
-1. **Sincronizar Versión (Semantic Versioning)**:
-   - Acatar `X.Y.Z` (Major.Minor.Patch).
-   - Actualizar `version` y `changelog` explícitamente en `metadata.txt`.
-     - ⚠️ **CRÍTICO**: Escapar todo `%` como `%%` en el changelog (e.g., `100%%` no `100%`).
-   - Actualizar `version` en `pyproject.toml` (si existe).
-   - Actualizar el badge de versión en `README.md`.
+1. **Synchronize Version (Semantic Versioning)**:
+   - Abide by `X.Y.Z` (Major.Minor.Patch).
+   - Update `version` and `changelog` explicitly in `metadata.txt`.
+     - ⚠️ **CRITICAL**: Escape all `%` as `%%` in the changelog (e.g., `100%%` not `100%`).
+   - Update `version` in `pyproject.toml`.
+   - Update the version badge in `README.md`.
 
-2. **Actualizar `README.md` (OBLIGATORIO)**:
-   🤖 **Agent Action**: Verificar y actualizar todos los badges y referencias de versión en `README.md`.
-   - Sección de "What's New": Resumir los cambios principales de esta versión.
+2. **Update `README.md` (MANDATORY)**:
+   🤖 **Agent Action**: Verify and update all badges and version references in `README.md`.
+   - `Version` badge: `X.Y.Z`
+   - `Code Quality` badge: Update with current `ai-ctx analyze` score.
+   - `QGIS Compliance` badge: Update with `qgis-analyzer` result.
+   - `i18n Languages` badge: Update if new languages were added.
+   - "What's New" section: Summarize the main changes of this version.
 
-   🤖 **Agent Action**: Validar que las versiones coinciden exactamente a lo largo del proyecto.
+   🤖 **Agent Action**: Validate that all 3 versions match exactly (`metadata.txt`, `pyproject.toml`, `README.md`).
 
-3. **Changelog Técnico (Keep A Changelog)**: Mover `[Unreleased]` a la nueva versión en `CHANGELOG.md` usando los tipos válidos (`Added`, `Changed`, `Fixed`, etc).
+3. **Technical Changelog (Keep A Changelog)**: Use **changelog-generator** to move `[Unreleased]` to the new version in `docs/CHANGELOG.md` and sync `docs/docsec/CHANGELOG.md` (Spanish) if applicable, using valid types (`Added`, `Changed`, `Fixed`, etc.).
 
-4. **Notas de Lanzamiento**:
-   🤖 **Agent Action**: Generar release notes estructuradas en la carpeta `docs/releases/`.
-
-### Fase 3: Verificación
-
-🤖 **Agent Action**: Usar skill **qa-qgis-docker** para validar tests y skill **commit-standards** para linting.
-
-1. **Linting & Formatting**:
+4. **Release Notes**:
    // turbo
    ```bash
-   {{LINTER_FIX_COMMAND}}
+   sed -e "s/{version}/X.Y.Z/g" -e "s/{date}/$(date +%F)/g" .github/release_template.md > /tmp/release_notes.md
    ```
-2. **Tests**:
+
+   🤖 **Agent Action**: Generate structured release notes using **changelog-generator** following **release-management** skill template.
+
+### Phase 3: Verification
+
+🤖 **Agent Action**: Use **qa-docker** skill to validate tests and skill **commit-standards** for linting.
+
+1. **Security Scan** (Deep Audit):
    // turbo
    ```bash
-   {{MASTER_TEST_COMMAND}}
+   uv run qgis-analyzer security --deep .
    ```
 
-   🤖 **Agent Action**: Alertar si algún test falla o si hay regresión en cobertura.
+   🤖 **Agent Action**: Review security reports. No HIGH severity findings allowed to proceed.
 
-### Fase 4: Git y Tagging
-
-🤖 **Agent Action**: Usar skill **commit-standards** para mensaje de commit.
-
-1. **Commit de Preparación**:
-   Asegurar que `.qgisignore` está actualizado y optimizado.
+2. **Linting & Formatting**:
+   // turbo
    ```bash
-   git add metadata.txt pyproject.toml CHANGELOG.md README.md docs/releases/ .qgisignore
+   uv run ruff check --fix . && uv run ruff format . && uv run black .
+   ```
+   **Note**: Document minor linting issues (like F821/W503 in external reports) for later fix if they don't block functionality.
+
+3. **Tests**:
+   // turbo
+   ```bash
+   make docker-test
+   ```
+   (535+ tests must pass).
+
+   🤖 **Agent Action**: Alert if any test fails or if there is a coverage regression.
+
+### Phase 4: Git and Tagging
+
+🤖 **Agent Action**: Use **commit-standards** skill for commit message.
+
+1. **Preparation Commit**:
+   Ensure `.qgisignore` is updated and optimized.
+   ```bash
+   git add metadata.txt pyproject.toml docs/CHANGELOG.md docs/docsec/CHANGELOG.md README.md docs/releases/RELEASE_NOTES_vX.Y.Z.md .qgisignore
    git commit -m "chore(release): prepare vX.Y.Z"
    ```
 
 2. **Tag**: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`
 3. **Push**: `git push origin main && git push origin vX.Y.Z`
 
-### Fase 5: Empaquetado y Distribución
+### Phase 5: Packaging and Distribution
 
-🤖 **Agent Action**: Usar skill **release-management** para validar artifacts y proceso de publicación.
+🤖 **Agent Action**: Use **release-management** skill to validate artifacts and publication process.
 
-1. **Build ZIP Optimizado**:
+1. **Validate `metadata.txt`**:
    // turbo
    ```bash
-   # EJEMPLO: pb_tool zip o make package
+   uv run qgis-analyzer metadata .
+   ```
+
+2. **Validate `pyproject.toml`**:
+   // turbo
+   ```bash
+   uv run qgis-analyzer pyproject .
+   ```
+
+3. **Quick Scan (Linting & Security)**:
+   // turbo
+   ```bash
+   uv run qgis-analyzer analyze . --strict
+   ```
+
+4. **Build Optimized ZIP**:
+   // turbo
+   ```bash
    make package VERSION=main
    ```
-   (Verificar en `dist/` o directorio de build).
+   (Verify in `dist/`).
 
    🤖 **Agent Action**:
-   - Validar contenido del ZIP (sin logs, sin `sample_data`, sin caches `__pycache__`).
-   - Verificar `sha256` checksum si aplica.
+   - Validate ZIP contents (no logs, no `sample_data`, no caches).
+   - **Key Metric**: Package size should be < 500KB (Ideally ~220KB).
+   - Check `sha256` checksum.
 
 2. **GitHub Release**:
    ```bash
-   gh release create vX.Y.Z --title "vX.Y.Z" --notes-file docs/releases/RELEASE_NOTES_vX.Y.Z.md dist/*.zip --draft
+   gh release create vX.Y.Z --title "vX.Y.Z" --notes-file docs/releases/RELEASE_NOTES_vX.Y.Z.md dist/*.zip dist/*.sha256 --draft
    ```
 
-3. **Portal QGIS**: Subir el ZIP a [plugins.qgis.org](https://plugins.qgis.org/).
+3. **QGIS Portal**: Upload the ZIP to [plugins.qgis.org](https://plugins.qgis.org/).
 
-## Resultado Esperado
-- Versión oficial empaquetada lista para QGIS Plugin Repository.
-- Documentación y tags de Git sincronizados.
-- Plugin validado técnicamente y limpio de artifacts de desarrollo.
+   🤖 **Agent Action**: Remember to validate post-publication:
+   - Plugin appears in QGIS Plugin Manager
+   - Version is correct
+   - Changelog is visible
+
+## Expected Result
+- Official version published on QGIS repository and GitHub.
+- Documentation and Git tags synchronized.
+- Technically validated plugin with visible metrics.

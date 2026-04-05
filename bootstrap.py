@@ -30,15 +30,11 @@ def setup_project():
         sys.exit(1)
 
     # Replace Project Name in template files
-    files_to_process = [
-        Path("pyproject.toml"),
-        Path("README.md"),
-        Path("metadata.txt")
-    ]
+    files_to_process = [Path("pyproject.toml"), Path("README.md"), Path("metadata.txt")]
 
     placeholder_name = "{{PROJECT_NAME}}"
 
-    print(f"\n📝 Replacing placeholders in base files...")
+    print("\n📝 Replacing placeholders in base files...")
 
     for file_path in files_to_process:
         if file_path.exists():

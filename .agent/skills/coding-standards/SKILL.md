@@ -1,43 +1,61 @@
 ---
 name: coding-standards
-description: Estándares de codificación, formato, convenciones de nomenclatura y calidad general del código.
-trigger: al escribir código nuevo, realizar refactorizaciones o proponer patrones de diseño.
+description: Project coding standards, focused on the use of pathlib, Google docstrings, and strict typing.
+trigger: when writing Python code, performing refactors, or defining file paths.
 ---
 
-# Estándares de Codificación
+# Coding Standards
 
-Define las normas técnicas para asegurar un código moderno, mantenible y coherente de acuerdo con las convenciones del lenguaje y framework utilizado en el proyecto.
+Defines the technical rules to ensure modern, maintainable, and consistent Python code throughout the SecInterp plugin.
 
-## Cuándo usar este skill
-- Al crear nuevos componentes, módulos o funciones.
-- Al realizar refactorizaciones de código existente.
-- Al revisar *Pull Requests* o evaluar calidad de código.
+## When to use this skill
+- When creating new Python modules or functions.
+- When refactoring existing code.
+- When defining file paths or manipulating the file system.
 
-## Grado de Libertad
-- **Estricto**: El código debe adherirse a los linters configurados en el proyecto y a las mejores prácticas de la industria (SOLID, DRY, KISS).
+## Degree of Freedom
+- **Strict**: The use of `pathlib`, Google Docstrings, and Type Hints is mandatory.
 
 ## Workflow
-1. **Diseño Cuidado**: Planificar la estructura y tipos de datos antes de escribir la lógica.
-2. **Implementación Constreñida**: Seguir las convenciones de *naming* y estructura del proyecto.
-3. **Documentación Activa**: Escribir comentarios aclaratorios (docstrings, JSDoc) según el estándar del lenguaje.
-4. **Validación Automática**: Ejecutar los linters y formatters obligatorios (`{{LINTER_COMMAND}}`).
+1. **Typing**: Add type annotations (Type Hints) to all arguments and return values.
+2. **Documentation**: Write docstrings following the Google format.
+3. **Paths**: Replace string manipulations or `os.path` with `pathlib.Path` objects.
+4. **Modeling**: Mandatory use of Dataclasses (DTOs) for all service returns. Avoid using index-based tuples for complex data transfer.
+5. **Validation**: Run `black .` and `ruff check .` to confirm compliance.
+5. **Audit**: Use `qgis-analyzer analyze i18n` for new strings and `security` for sensitive code.
 
-## Instrucciones y Reglas
+## Instructions and Rules
 
-### Modernidad y Seguridad
-- Preferir APIs modernas del lenguaje (ej. `pathlib` en Python, manipulación inmutable de arrays en JS/TS).
-- Evitar *magic strings* y *magic numbers*; extraer a constantes.
+### Modern Python (Pathlib)
+- NEVER use string concatenation for paths.
+- Use `/` to join paths with `Path`.
+- Example: `base_dir / "data" / "file.txt"`.
 
-### Documentación y Tipado
-- Utilizar sistemas de tipado estático siempre que el lenguaje lo soporte (TypeScript, Type Hints en Python, typing extendido).
-- Documentar funciones públicas: propósito del método, argumentos esperados y valor de retorno, especialmente si el comportamiento es complejo o expuesto en un API.
+### Data Transfer Objects (DTOs)
+- **Mandatory** use of Dataclasses (DTOs) for all service returns.
+- Avoid index-based tuples for complex data transfer.
 
-### Calidad de Código
-- **Complejidad Ciclomática**: Mantener métodos y funciones pequeños (idealmente < 15 en métricas de complejidad).
-- **Responsabilidad Única**: Separar la lógica de interfaz de usuario de la lógica de negocio subyacente.
+### Documentation (Google Style)
+```python
+"""Module-level docstring (MANDATORY per PEP 257)."""
 
-## Checklist de Calidad
-- [ ] ¿El código refleja los principios SOLID?
-- [ ] ¿Se utilizaron anotaciones de tipos consistentes?
-- [ ] ¿Las funciones/clases clave están debidamente documentadas?
-- [ ] ¿El código pasa limpiamente el chequeo del linter y auto-formateador configurado en el proyecto?
+def function(arg1: int) -> str:
+    """Short summary.
+
+    Args:
+        arg1: Argument description.
+
+    Returns:
+        Return value description.
+    """
+```
+
+### Code Quality
+- Follow SOLID principles.
+- Keep cyclomatic complexity below 15.
+
+## Quality Checklist
+- [ ] Is `pathlib` used for all paths?
+- [ ] Do all functions have Type Hints?
+- [ ] Do docstrings follow the Google format?
+- [ ] Does the code pass `ruff` and `black` checks?

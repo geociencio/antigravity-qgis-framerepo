@@ -1,46 +1,42 @@
 ---
 name: project-context
-description: Resumen del propósito, arquitectura y estructura del proyecto.
-trigger: al iniciar nuevas tareas, solicitar resúmenes o explicar la arquitectura del sistema.
+description: Summary of the purpose, architecture, and structure of the {{PROJECT_NAME}} project.
+trigger: when starting new tasks, requesting summaries, or explaining the plugin architecture.
 ---
 
-# Contexto del Proyecto
+# {{PROJECT_NAME}} Project Context
 
-Proporciona una visión integral de la arquitectura del proyecto, facilitando la toma de decisiones coherentes y alineadas con la visión técnica.
+Provides a comprehensive view of the {{PROJECT_NAME}} plugin, facilitating consistent architectural decision-making.
 
-> **NOTA PARA EL DESARROLLADOR:** Este archivo es una plantilla. Debes rellenarlo con la información arquitectónica de tu proyecto real.
+## When to use this skill
+- At the start of a session to refresh architectural knowledge.
+- When proposing structural changes or new integrations.
+- When the user requests the current project status.
 
-## Cuándo usar este skill
-- Al inicio de una sesión para refrescar la arquitectura.
-- Al proponer cambios estructurales o nuevas integraciones.
-- Cuando el usuario solicita un estado actual o resumen del proyecto.
-
-## Grado de Libertad
-- **Guiado**: Utilizar esta información como marco de referencia inmutable para proponer soluciones alineadas con la visión del proyecto. No proponer arquitecturas alternativas a menos que el usuario lo solicite explícitamente.
+## Degree of Freedom
+- **Guided**: Use this information as a reference frame to propose solutions aligned with the project's vision.
 
 ## Workflow
-1. **Lectura**: Consultar el `AI_CONTEXT.md` (si existe) y las directrices de este archivo.
-2. **Análisis**: Identificar los límites entre las diferentes capas de la arquitectura (ej: Frontend vs Backend, Core vs Plugin).
-3. **Validación**: Asegurar que las nuevas propuestas no violen el desacoplamiento definido.
+1. **Reading**: Consult `AI_CONTEXT.md` and `PROJECT_SUMMARY.md`.
+2. **Analysis**: Identify boundaries between `core`, `gui`, and relevant modules.
+3. **Validation**: Ensure new proposals do not violate defined decoupling.
 
-## Instrucciones y Reglas
+## Instructions and Rules
 
-### Propósito del Proyecto
-[Describe aquí brevemente qué hace tu aplicación y quiénes son los usuarios finales. Ej: Plataforma SaaS para gestión de inventarios en tiempo real].
+### Purpose
+{{PROJECT_NAME}} is an advanced tool that allows for {{BRIEF_DESCRIPTION}} within QGIS, optimizing the workflow.
 
-### Arquitectura Core
-[Añade las reglas de oro de tu arquitectura. Ejemplos:]
-- **API First**: Todo el backend debe exponerse mediante una API RESTful o GraphQL.
-- **Microfrontends**: La UI está dividida en submódulos gestionados por Webpack Module Federation.
-- **Event-Driven**: La comunicación entre servicios críticos se hace a través de RabbitMQ.
+### Core Architecture
+- **Local First**: Prioritizes local performance and efficient memory management.
+- **UI-Agnostic**: The processing core must function independently of Qt graphics elements.
+- **3-Level Validation**: (Type, Schema, Business) in all domain services.
 
-### Estructura de Carpetas 
-[Explica cómo está organizado tu repositorio. Ejemplos:]
-- `src/core/`: Cerebro del backend (Modelos, Casos de Uso).
-- `src/ui/`: Interfaz de usuario (Componentes React/Vue).
-- `infrastructure/`: Configuración de Terraform, Docker o Kubernetes.
+### Folder Structure
+- `core/`: Plugin brain (servers, core logic).
+- `gui/`: Dynamic and responsive user interface.
+- `scripts/`: Utility and synchronization tools.
 
-## Checklist de Calidad Arquitectónica
-- [ ] ¿La propuesta respeta la separación de responsabilidades (Seperation of Concerns)?
-- [ ] ¿Se alinea con la visión técnica (ej. "Local First", "Cloud Native")?
-- [ ] ¿Se mantiene la integridad de los contratos entre interfaces/módulos?
+## Quality Checklist
+- [ ] Does the proposal respect Core/GUI separation?
+- [ ] Does it align with the "Local First" vision?
+- [ ] Is 3-level validation integrity maintained?

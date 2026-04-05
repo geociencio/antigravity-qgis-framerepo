@@ -1,63 +1,73 @@
 ---
-description: Workflow guiado para refactorización de código con validación de complejidad
-agent: Tech Lead
-skills: [coding-standards, project-context]
+description: Guided workflow for code refactoring with complexity validation
+agent: Senior Architect
+skills: [domain-logic, domain-logic]
 validation: |
-  - Verificar que complejidad ciclomática general se redujo
-  - Confirmar que tests siguen pasando después de la refactorización
-  - Validar que no se introdujeron violaciones de arquitectura (Core vs UI)
+  - Verify that cyclomatic complexity decreased (CC < 15)
+  - Confirm that tests still pass after refactoring
+  - Validate that no architecture violations were introduced
 ---
 
-Este workflow guía la refactorización de código siguiendo los estándares del proyecto y usando conocimiento arquitectónico.
+# Workflow: Refactor Code
 
-## Cuándo Usar Este Workflow
+This workflow guides code refactoring following project standards and using specialized knowledge from skills.
 
-- Cuando analizadores de código estático (Sonarqube, ESLint, Ruff) detectan métodos muy complejos.
-- Cuando la arquitectura base se siente acoplada o difícil de testear.
-- Antes de añadir nuevas funcionalidades a módulos o clases muy extensas.
+## When to Use This Workflow
 
+- When `qgis-analyzer` detects methods with CC > 15.
+- When `AI_CONTEXT.md` identifies critical technical debt.
+- Before adding new features to complex modules.
 
-## Pasos de Refactorización
+## Refactoring Steps
 
-1. **Identificar Objetivo de Refactorización**:
+1. **Identify Refactoring Target**:
    // turbo
    ```bash
-   # EJEMPLO PYTHON: radon cc . -a
-   # EJEMPLO JS: eslint .
-   {{COMPLEXITY_CHECK_COMMAND}}
+   uv run ai-ctx analyze .
    ```
 
-   🤖 **Agent Action**: Identificar hotspots y deuda técnica leyendo métricas o preguntando al usuario sobre los puntos de dolor actuales.
+   🤖 **Agent Action**: Analyze `analysis_results/PROJECT_SUMMARY.md` to identify hotspots (CC > 15) and technical debt.
 
-2. **Cargar Contexto Especializado**:
-
-   🤖 **Agent Action**: Leer `project-context` para entender los límites arquitectónicos del módulo que se va a refactorizar. Asegurar adherencia a `coding-standards`.
-
-3. **Aplicar Refactorización**:
-
-   🤖 **Agent Action**: Aplicar principios SOLID. Reducir complejidad ciclomática extrayendo métodos o moviendo lógica a clases/servicios dedicados. Mantener TDD si es posible.
-
-4. **Validar con Tests**:
+2. **Quick Auto-Correction** (Optional):
    // turbo
    ```bash
-   # Ejecutar control completo de tests
-   {{MASTER_TEST_COMMAND}}
+   uv run qgis-analyzer fix --dry-run .
    ```
+   🤖 **Agent Action**: If safe auto-corrections are available, apply them using `fix --apply` before proceeding with manual refactoring.
 
-   🤖 **Agent Action**: Usar skill **qa-standards** para asegurar que no hay regresiones y que se mantienen/mejoran las pruebas unitarias afectadas.
+3. **Load Specialized Context**:
 
-5. **Verificar Métricas de Calidad**:
+   🤖 **Agent Action**: Depending on the module, load the appropriate skill (**domain-logic**, **domain-logic**, or **ui-framework**).
+
+4. **Apply Refactoring**:
+
+   🤖 **Agent Action**: Apply SOLID principles and reduce cyclomatic complexity.
+
+5. **Validate with Tests**:
    // turbo
    ```bash
-   {{COMPLEXITY_CHECK_COMMAND}}
+   make docker-test
    ```
 
-   🤖 **Agent Action**: Confirmar mejora en las métricas y reducción de código "spaghetti".
+   🤖 **Agent Action**: Use **qa-standards** skill to ensure no regressions.
 
-6. **Commit de Refactorización**:
-   Usar workflow `/crea-commit` con mensaje técnico estructurado, asegurando un prefijo `refactor:`.
+6. **Verify Quality Metrics**:
+   // turbo
+   ```bash
+   uv run ai-ctx analyze .
+   ```
 
-## Resultado Esperado
-- Código más mantenible, testeable y con menor complejidad cognitiva.
-- Cero regresiones funcionales confirmadas por pruebas automatizadas.
-- Documentación técnica (docstrings/JSDoc) actualizada o mejorada.
+   🤖 **Agent Action**: Confirm improvement in Quality Score and reduction in Cyclomatic Complexity (CC).
+
+6.5 Complexity Audit (Auditor Reflection) 🤖
+- **Agent Reflection**: Activate the **@auditor** role.
+- **Verification**: Ensure the refactor didn't introduce new architecture violations or hide complexity in "wrapper" functions.
+- **Pattern Match**: Confirm adherence to the "Extract-then-Compute" standard.
+
+7. **Refactoring Commit**:
+   Use `/create-commit` workflow with a structured technical message.
+
+## Expected Result
+- More maintainable, testable code with reduced cyclomatic complexity.
+- Zero functional regressions confirmed by tests.
+- Technical documentation (docstrings) updated.

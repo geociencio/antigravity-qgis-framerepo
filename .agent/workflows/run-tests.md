@@ -1,47 +1,52 @@
 ---
-description: Procedimiento estándar para ejecutar pruebas unitarias y de integración de forma fiable
+description: How to run unit tests reliably
 agent: QA Engineer
-skills: [qa-standards]
+skills: [qa-docker]
 validation: |
-  - Verificar que todos los tests críticos pasen
-  - Confirmar que el entorno de CI o local reporta éxito (Exit Code 0)
+  - Verify that all tests pass (535 tests OK)
+  - Confirm that there are no mocking errors
 ---
 
-Este workflow describe la manera estándar de ejecutar y validar la batería de pruebas del proyecto, asegurando que no haya regresiones.
+# Workflow: Run Tests
 
-> **NOTA PARA EL DESARROLLADOR:** Ajusta los comandos de prueba específicos de tu proyecto reemplazando `{{TEST_COMMAND}}`.
+This workflow ensures that the plugin's stability is verified through unit and integration tests.
 
-1. **Test Ligeros / Unitarios (Fast Feedback)**:
-   Ejecuta las pruebas rápidas que no requieren levantar infraestructura pesada.
-   ```bash
-   # EJEMPLO: pytest tests/unit/
-   # EJEMPLO JS: npm run test:unit
-   {{UNIT_TEST_COMMAND}}
-   ```
+### 1. Run Unit Tests (Fast)
+```bash
+PYTHONPATH=.. uv run python3 -m unittest discover tests/core
+```
 
-2. **Test de Integración (End-to-End)**:
-   Ejecuta las pruebas que conectan múltiples módulos o requieren el entorno completo.
-   ```bash
-   # EJEMPLO: pytest tests/integration/
-   # EJEMPLO JS: npm run cypress:run
-   {{INTEGRATION_TEST_COMMAND}}
-   ```
+### 2. Run Integration Tests (Real QGIS)
+```bash
+FORCE_MOCKS=0 PYTHONPATH=.. uv run python3 -m unittest discover tests/integration
+```
 
-3. **Check de Calidad Completo (Definitive Master Check)**:
-   El control de salud definitivo suele ejecutarse en un entorno aislado similar a producción (ej. Docker).
-   // turbo
-   ```bash
-   # EJEMPLO: make docker-test
-   {{MASTER_TEST_COMMAND}}
-   ```
+### 3. Recommended Method (Docker - Complete)
+The definitive health check is running all tests in Docker:
+// turbo
+```bash
+make docker-test
+```
 
-**Key Notes (Configurables por Proyecto):**
-- **Aislamiento de Tests**: Evitar ejecutar pruebas unitarias e integración en el mismo hilo de ejecución si hay estado compartido (ej. Bases de Datos, Mocks persistentes).
-- **Cobertura**: Asegúrate de que los frameworks generen un reporte de cobertura (ej: `--cov` en python, `--coverage` en jest).
+**Key Notes:**
+- Do not use `pytest`. The project has migrated to strict `unittest`.
+- Always set `PYTHONPATH=..` when running unit tests from the project root.
+- **Process Isolation**: Do NOT run `tests/core` and `tests/integration` in the same process to avoid Mock pollution.
 
-🤖 **Agent Action**: Usar skill **qa-standards** para interpretar los fallos (leer la salida de consola o archivos de log generados) y validar si la estretegia de Mocks o asilaimento fue correcta.
+🤖 **Agent Action**: Use **qa-docker** skill to interpret failures and validate the mocking strategy.
 
-## Resultado Esperado
-- Informe claro del estado de estabilidad del proyecto ("En verde" o "En rojo").
-- Identificación precisa de regresiones o fallos en tests específicos.
-- Confirmación de si el código es seguro para ser integrado en la rama principal.
+## Expected Result
+- Clear report of the project's stability status.
+- Identification of regressions or mock failures.
+- Confirmation of whether the code is safe to be integrated.
+
+## Structured Result Summary
+🤖 **Agent Action**: Conclude with a YAML block summarizing the test run:
+```yaml
+test_run: complete
+total_tests: 535
+passed: X
+failed: Y
+errors: Z
+stability_score: 0-100
+```

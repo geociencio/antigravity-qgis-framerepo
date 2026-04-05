@@ -10,6 +10,7 @@ authors = [
 keywords = ["qgis", "qgis-plugin", "python", "ai-agents", "antigravity-framework", "template", "gis", "llm-workflow"]
 dependencies = [
     "ai-context-core>=3.0.1",
+    "pyyaml>=6.0.3",
 ]
 
 [dependency-groups]
